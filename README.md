@@ -146,3 +146,4 @@ Interactive API docs: **http://localhost:8000/docs**
 | Document Parsing | LlamaParse |
 | Database ORM | SQLAlchemy + PyMySQL |
 | Env Management | python-dotenv |
+
