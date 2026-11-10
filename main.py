@@ -7,10 +7,15 @@ env_path = Path(__file__).resolve().parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
 from llama_index.core import Settings
+from llama_index.llms.groq import Groq
 from llama_index.llms.gemini import Gemini
 
-# Global LlamaIndex LLM configuration
-Settings.llm = Gemini(model="models/gemini-3.5-flash", api_key=os.getenv("GEMINI_API_KEY"), timeout=120.0)
+# LLM Redundancy: Groq llama-3.3-70b-versatile with Gemini fallback
+groq_api_key = os.getenv("GROQ_API_KEY")
+if groq_api_key and groq_api_key.strip():
+    Settings.llm = Groq(model="llama-3.3-70b-versatile", api_key=groq_api_key)
+else:
+    Settings.llm = Gemini(model="models/gemini-3.8-flash", api_key=os.getenv("GEMINI_API_KEY"), timeout=120.0)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,9 +23,10 @@ from api.routes import router as audit_router
 
 app = FastAPI(title="AuditRAG API", version="1.0")
 
+# Permissive CORS Policy for Vercel production frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Change to Vercel URL in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

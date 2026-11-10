@@ -27,19 +27,13 @@ _aclient = None
 def get_qdrant_client() -> QdrantClient:
     global _client
     if _client is None:
-        url = os.getenv("QDRANT_URL")
-        api_key = os.getenv("QDRANT_API_KEY")
-        # Added a 120-second timeout for large batch uploads
-        _client = QdrantClient(url=url, api_key=api_key, timeout=120.0)
+        _client = QdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY"))
     return _client
 
 def get_qdrant_aclient() -> AsyncQdrantClient:
     global _aclient
     if _aclient is None:
-        url = os.getenv("QDRANT_URL")
-        api_key = os.getenv("QDRANT_API_KEY")
-        # Added a 120-second timeout for the async pipeline uploads
-        _aclient = AsyncQdrantClient(url=url, api_key=api_key, timeout=120.0)
+        _aclient = AsyncQdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY"))
     return _aclient
 
 async def ingest_documents_to_qdrant(documents: List[Document], collection_name: str) -> Dict[str, any]:

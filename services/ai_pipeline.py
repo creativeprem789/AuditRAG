@@ -13,18 +13,21 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential, retry_i
 
 from llama_index.core import VectorStoreIndex, Settings, QueryBundle
 from llama_index.core.prompts import PromptTemplate
+from llama_index.llms.groq import Groq
 from llama_index.llms.gemini import Gemini
 from llama_index.postprocessor.cohere_rerank import CohereRerank
 from llama_index.embeddings.cohere import CohereEmbedding
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 
+def configure_llm():
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    if groq_api_key and groq_api_key.strip():
+        return Groq(model="llama-3.3-70b-versatile", api_key=groq_api_key)
+    return Gemini(model="models/gemini-3.8-flash", api_key=os.getenv("GEMINI_API_KEY"), timeout=120.0)
+
 # Global LlamaIndex Settings
-Settings.llm = Gemini(
-    model="models/gemini-3.5-flash",
-    api_key=os.getenv("GEMINI_API_KEY"),
-    timeout=120.0
-)
+Settings.llm = configure_llm()
 Settings.embed_model = CohereEmbedding(
     cohere_api_key=os.getenv("COHERE_API_KEY"),
     model_name="embed-english-v3.0"
@@ -34,12 +37,8 @@ Settings.chunk_overlap = 50
 
 def init_settings():
     """Lazily configure LLM and embedding settings if not already set."""
-    if Settings.llm is None or not isinstance(Settings.llm, Gemini):
-        Settings.llm = Gemini(
-            model="models/gemini-3.5-flash",
-            api_key=os.getenv("GEMINI_API_KEY"),
-            timeout=120.0
-        )
+    if Settings.llm is None or not (isinstance(Settings.llm, Groq) or isinstance(Settings.llm, Gemini)):
+        Settings.llm = configure_llm()
     if Settings.embed_model is None or not isinstance(Settings.embed_model, CohereEmbedding):
         Settings.embed_model = CohereEmbedding(
             cohere_api_key=os.getenv("COHERE_API_KEY"),
@@ -63,6 +62,8 @@ Respond ONLY in valid JSON format matching this schema:
   "violated_rule_section": "String of the section cited, or null",
   "explanation": "A concise, 2-sentence explanation of the ruling."
 }
+
+You must respond ONLY with a valid JSON object matching the required schema. Do not include markdown formatting or conversational text.
 """
 prompt_template = PromptTemplate(AUDITOR_SYSTEM_PROMPT)
 
@@ -93,8 +94,8 @@ async def execute_audit_query(claim: str, collection_name: str = "rulebook") -> 
         init_settings()
         cohere_api_key = os.getenv("COHERE_API_KEY")
 
-        # A. Connect to the existing Qdrant vectors (120s timeout for large collection queries)
-        client = QdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY"), timeout=120.0)
+        # A. Connect to the existing Qdrant vectors
+        client = QdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY"))
         vector_store = QdrantVectorStore(client=client, collection_name=collection_name)
         index = VectorStoreIndex.from_vector_store(vector_store)
 
