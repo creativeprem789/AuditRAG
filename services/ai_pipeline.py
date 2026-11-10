@@ -32,7 +32,7 @@ def init_settings():
     """Lazily configure LLM settings so environment variables are loaded."""
     if Settings.llm is None or not isinstance(Settings.llm, Groq):
         groq_key = os.getenv("GROQ_API_KEY")
-        Settings.llm = Groq(model="openai/gpt-oss-120b", api_key=groq_key)
+        Settings.llm = Groq(model="llama3-8b-8192", api_key=groq_key)
     if Settings.embed_model is None or not isinstance(Settings.embed_model, CohereEmbedding):
         Settings.embed_model = CohereEmbedding(
             cohere_api_key=os.getenv("COHERE_API_KEY"),
