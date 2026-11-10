@@ -8,11 +8,11 @@ import { useEffect, useCallback, useState } from "react";
 import { HONEY_POT_FALLBACK_JSON, type AuditReportJSON } from "@/data/honeyPotFallback";
 
 export function useHackathonFallback() {
-  // Pre-load HONEY_POT_FALLBACK_JSON by default so the playground is immediately live,
-  // matching the reference screenshot out-of-the-box
-  const [report, setReport] = useState<AuditReportJSON | null>(HONEY_POT_FALLBACK_JSON);
+  // Start with clean initial state for real user uploads.
+  // Fallback preset can be triggered anytime via Ctrl+Shift+F or demo presets.
+  const [report, setReport] = useState<AuditReportJSON | null>(null);
   const [showFlash, setShowFlash] = useState(false);
-  const [isFallbackActive, setIsFallbackActive] = useState(true);
+  const [isFallbackActive, setIsFallbackActive] = useState(false);
 
   const activateFallback = useCallback(() => {
     setReport(HONEY_POT_FALLBACK_JSON);

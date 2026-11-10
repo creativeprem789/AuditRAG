@@ -29,6 +29,7 @@ interface PdfViewerProps {
   onPageChange: (page: number) => void;
   activeTab: "uploaded" | "groundTruth";
   onTabChange: (tab: "uploaded" | "groundTruth") => void;
+  isFallbackActive?: boolean;
 }
 
 export default function PdfViewer({
@@ -44,6 +45,7 @@ export default function PdfViewer({
   onPageChange,
   activeTab,
   onTabChange,
+  isFallbackActive = false,
 }: PdfViewerProps) {
   const [numPages, setNumPages] = useState<number>(totalPages || 28);
   const [scale, setScale] = useState(1.0);
@@ -123,8 +125,10 @@ export default function PdfViewer({
       {/* PDF Document Tab (Green Circled Area: Shows Target/Uploaded PDF Name) */}
       <div className="px-4 py-1.5 border-b border-zinc-800 bg-[#0f0f13]">
         <div className="inline-flex items-center gap-2 text-zinc-300 text-xs bg-[#17171d] px-2.5 py-1 rounded border border-zinc-800 font-mono">
-          <FileText size={12} className="text-violet-400" />
-          <span>{uploadedDocName || targetDocName || groundTruthPdfName}</span>
+          <FileText size={12} className={uploadedDocName || targetDocName || isFallbackActive ? "text-violet-400" : "text-zinc-500"} />
+          <span>
+            {uploadedDocName || targetDocName || (isFallbackActive ? groundTruthPdfName : "No document loaded")}
+          </span>
         </div>
       </div>
 
@@ -135,17 +139,18 @@ export default function PdfViewer({
           <span className="text-zinc-500 text-[11px]">Page</span>
           <input
             type="number"
-            value={currentPage}
+            disabled={!currentDisplayUrl && !isFallbackActive}
+            value={!currentDisplayUrl && !isFallbackActive ? 0 : currentPage}
             onChange={(e) => goToPage(Number(e.target.value))}
-            className="w-7 bg-zinc-800 border border-zinc-700 text-white text-[11px] text-center rounded px-1 py-0.5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="w-7 bg-zinc-800 border border-zinc-700 text-white disabled:text-zinc-500 text-[11px] text-center rounded px-1 py-0.5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           <span className="text-zinc-400 text-[11px]">
-            {currentPage} of {numPages}
+            {!currentDisplayUrl && !isFallbackActive ? "0 of 0" : `${currentPage} of ${numPages}`}
           </span>
           <div className="flex items-center gap-0.5 ml-1">
             <button
               onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage <= 1}
+              disabled={!currentDisplayUrl && !isFallbackActive || currentPage <= 1}
               className="p-1 text-zinc-400 hover:text-white disabled:opacity-30 transition-colors cursor-pointer"
               title="Previous Page"
             >
@@ -153,7 +158,7 @@ export default function PdfViewer({
             </button>
             <button
               onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage >= numPages}
+              disabled={!currentDisplayUrl && !isFallbackActive || currentPage >= numPages}
               className="p-1 text-zinc-400 hover:text-white disabled:opacity-30 transition-colors cursor-pointer"
               title="Next Page"
             >
@@ -237,7 +242,7 @@ export default function PdfViewer({
                 ))}
               </div>
             </Document>
-          ) : (
+          ) : isFallbackActive ? (
             /* High-Precision Gazette Surface for Ground Truth */
             <div className="w-[620px] min-h-[820px] bg-white text-zinc-900 p-10 shadow-2xl font-serif text-[12px] leading-relaxed relative select-text border border-zinc-300">
               {/* Gazette Running Header */}
@@ -369,6 +374,17 @@ export default function PdfViewer({
                   </div>
                 );
               })}
+            </div>
+          ) : (
+            /* Clean Empty State when no document or fallback is active */
+            <div className="w-[620px] min-h-[500px] flex flex-col items-center justify-center text-zinc-500 gap-3 p-8 border border-dashed border-zinc-800 rounded-xl bg-[#0f0f13]/60">
+              <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500">
+                <FileText size={28} className="text-zinc-500" />
+              </div>
+              <p className="text-sm font-semibold text-zinc-300">No Document Selected</p>
+              <p className="text-xs text-zinc-500 max-w-sm text-center">
+                Upload a target PDF to view document pages and inspect real-time compliance findings against the regulatory rulebook.
+              </p>
             </div>
           )}
         </div>

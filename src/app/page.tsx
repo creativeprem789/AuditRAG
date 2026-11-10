@@ -34,17 +34,15 @@ export default function DashboardPage() {
     useHackathonFallback();
 
   // ── PILLAR C: Focused violation for auto-scroll ──
-  const [focusedViolation, setFocusedViolation] = useState<ViolationItem | null>(
-    HONEY_POT_FALLBACK_JSON.findings[0]
-  );
-  const [currentPage, setCurrentPage] = useState<number>(4);
+  const [focusedViolation, setFocusedViolation] = useState<ViolationItem | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [showPlanBar, setShowPlanBar] = useState(true);
 
   // Uploaded PDF state
   const [uploadedPdfUrl, setUploadedPdfUrl] = useState<string | null>(null);
   const [uploadedDocName, setUploadedDocName] = useState<string | null>(null);
   const [activeViewerTab, setActiveViewerTab] = useState<"uploaded" | "groundTruth">(
-    "groundTruth"
+    "uploaded"
   );
 
   // Modals for interactive demo
@@ -292,13 +290,14 @@ export default function DashboardPage() {
               uploadedDocName={uploadedDocName}
               targetDocName={report?.targetDocumentName}
               groundTruthPdfName={report?.groundTruthPdfName ?? "DPDP_Act_2023_Official.pdf"}
-              totalPages={report?.totalPages ?? 28}
+              totalPages={report?.totalPages ?? 1}
               focusedViolation={focusedViolation}
               allViolations={report?.findings ?? []}
               currentPage={currentPage}
               onPageChange={setCurrentPage}
               activeTab={activeViewerTab}
               onTabChange={setActiveViewerTab}
+              isFallbackActive={isFallbackActive}
             />
 
             {/* Visual Bezier Connector when Card #1 is focused on Page 4 in Ground Truth view */}
