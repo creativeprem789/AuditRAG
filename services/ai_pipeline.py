@@ -23,7 +23,8 @@ from qdrant_client import QdrantClient
 def configure_llm():
     groq_api_key = os.getenv("GROQ_API_KEY")
     if groq_api_key and groq_api_key.strip():
-        return Groq(model="llama-3.3-70b-versatile", api_key=groq_api_key)
+        groq_model = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+        return Groq(model=groq_model, api_key=groq_api_key)
     return Gemini(model="models/gemini-3.8-flash", api_key=os.getenv("GEMINI_API_KEY"), timeout=120.0)
 
 # Global LlamaIndex Settings
@@ -95,7 +96,7 @@ async def execute_audit_query(claim: str, collection_name: str = "rulebook") -> 
         cohere_api_key = os.getenv("COHERE_API_KEY")
 
         # A. Connect to the existing Qdrant vectors
-        client = QdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY"))
+        client = QdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY"), timeout=60.0)
         vector_store = QdrantVectorStore(client=client, collection_name=collection_name)
         index = VectorStoreIndex.from_vector_store(vector_store)
 

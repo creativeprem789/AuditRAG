@@ -10,10 +10,11 @@ from llama_index.core import Settings
 from llama_index.llms.groq import Groq
 from llama_index.llms.gemini import Gemini
 
-# LLM Redundancy: Groq llama-3.3-70b-versatile with Gemini fallback
+# LLM Redundancy: Groq with Gemini fallback (defaults to high-throughput openai/gpt-oss-120b)
 groq_api_key = os.getenv("GROQ_API_KEY")
 if groq_api_key and groq_api_key.strip():
-    Settings.llm = Groq(model="llama-3.3-70b-versatile", api_key=groq_api_key)
+    groq_model = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+    Settings.llm = Groq(model=groq_model, api_key=groq_api_key)
 else:
     Settings.llm = Gemini(model="models/gemini-3.8-flash", api_key=os.getenv("GEMINI_API_KEY"), timeout=120.0)
 
