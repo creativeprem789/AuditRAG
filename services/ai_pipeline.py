@@ -22,8 +22,9 @@ from qdrant_client import QdrantClient
 
 # Global LlamaIndex Settings
 Settings.llm = Gemini(
-    model="models/gemini-2.5-pro",
-    api_key=os.getenv("GEMINI_API_KEY")
+    model="models/gemini-3.1-pro-preview",
+    api_key=os.getenv("GEMINI_API_KEY"),
+    timeout=120.0
 )
 Settings.embed_model = CohereEmbedding(
     cohere_api_key=os.getenv("COHERE_API_KEY"),
@@ -36,8 +37,9 @@ def init_settings():
     """Lazily configure LLM and embedding settings if not already set."""
     if Settings.llm is None or not isinstance(Settings.llm, Gemini):
         Settings.llm = Gemini(
-            model="models/gemini-2.5-pro",
-            api_key=os.getenv("GEMINI_API_KEY")
+            model="models/gemini-3.1-pro-preview",
+            api_key=os.getenv("GEMINI_API_KEY"),
+            timeout=120.0
         )
     if Settings.embed_model is None or not isinstance(Settings.embed_model, CohereEmbedding):
         Settings.embed_model = CohereEmbedding(
