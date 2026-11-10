@@ -13,8 +13,7 @@ tenacity
 
 # AI Orchestration (Strict API integrations only)
 llama-index-core
-llama-index-llms-groq
-llama-index-llms-openai-like
+llama-index-llms-gemini
 llama-index-embeddings-cohere
 llama-index-postprocessor-cohere-rerank
 llama-index-vector-stores-qdrant

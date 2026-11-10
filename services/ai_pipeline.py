@@ -14,13 +14,17 @@ from groq import RateLimitError, InternalServerError
 
 from llama_index.core import VectorStoreIndex, Settings
 from llama_index.core.prompts import PromptTemplate
-from llama_index.llms.groq import Groq
+from llama_index.llms.gemini import Gemini
 from llama_index.postprocessor.cohere_rerank import CohereRerank
 from llama_index.embeddings.cohere import CohereEmbedding
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 
 # Global LlamaIndex Settings
+Settings.llm = Gemini(
+    model="models/gemini-2.5-pro",
+    api_key=os.getenv("GEMINI_API_KEY")
+)
 Settings.embed_model = CohereEmbedding(
     cohere_api_key=os.getenv("COHERE_API_KEY"),
     model_name="embed-english-v3.0"
@@ -29,10 +33,12 @@ Settings.chunk_size = 512
 Settings.chunk_overlap = 50
 
 def init_settings():
-    """Lazily configure LLM settings so environment variables are loaded."""
-    if Settings.llm is None or not isinstance(Settings.llm, Groq):
-        groq_key = os.getenv("GROQ_API_KEY")
-        Settings.llm = Groq(model="llama3-8b-8192", api_key=groq_key)
+    """Lazily configure LLM and embedding settings if not already set."""
+    if Settings.llm is None or not isinstance(Settings.llm, Gemini):
+        Settings.llm = Gemini(
+            model="models/gemini-2.5-pro",
+            api_key=os.getenv("GEMINI_API_KEY")
+        )
     if Settings.embed_model is None or not isinstance(Settings.embed_model, CohereEmbedding):
         Settings.embed_model = CohereEmbedding(
             cohere_api_key=os.getenv("COHERE_API_KEY"),

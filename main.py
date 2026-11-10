@@ -7,10 +7,10 @@ env_path = Path(__file__).resolve().parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
 from llama_index.core import Settings
-from llama_index.llms.groq import Groq
+from llama_index.llms.gemini import Gemini
 
-# Global LlamaIndex LLM configuration to use Groq's Llama-3 model
-Settings.llm = Groq(model="llama3-8b-8192", api_key=os.getenv("GROQ_API_KEY"))
+# Global LlamaIndex LLM configuration to use Gemini 2.5 Pro
+Settings.llm = Gemini(model="models/gemini-2.5-pro", api_key=os.getenv("GEMINI_API_KEY"))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
