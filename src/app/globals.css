@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/* ─── Base dark theme reset ─── */
+:root {
+  --app-bg: #0a0a0c;
+  --header-bg: #0d0d10;
+  --telemetry-bg: #111115;
+  --pane-bg: #121216;
+  --border: #27272a;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--app-bg);
+  color: #e4e4e7;
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar styling ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
+/* ─── Hide Next.js dev overlay indicator in bottom-left ─── */
+nextjs-portal,
+#__next-build-watcher,
+[data-nextjs-dev-tools-button],
+[data-nextjs-toast] {
+  display: none !important;
+}
+
+/* ─── react-pdf page canvas ─── */
+.react-pdf__Page__canvas {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+.react-pdf__Page__textContent {
+  display: none !important;
+}
+
+.react-pdf__Page__annotations {
+  display: none !important;
+}
+
+/* ─── Violation bounding box pulse ─── */
+@keyframes violation-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.75; }
+}
+
+.violation-bbox {
+  animation: violation-pulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ─── Fallback flash overlay ─── */
+@keyframes fallback-flash {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.fallback-flash {
+  animation: fallback-flash 1.2s ease-out forwards;
+}

@@ -1,0 +1,9 @@
+# Dependencies & build output
+node_modules/
+.next/
+out/
+
+# Environment & generated TypeScript/Next files
+.env*
+*.tsbuildinfo
+next-env.d.ts
