@@ -76,6 +76,9 @@ prompt_template = PromptTemplate(AUDITOR_SYSTEM_PROMPT)
 def _execute_with_retries(query_engine, claim: str):
     """Wraps the actual LLM API call to catch and retry transient errors."""
     print(f"Evaluating claim: '{claim[:50]}...'")
+    nodes = query_engine.retrieve(claim)
+    for node in nodes:
+        print(node.text)
     response = query_engine.query(claim)
     return response.response
 
@@ -100,7 +103,7 @@ async def execute_audit_query(claim: str, collection_name: str = "rulebook") -> 
 
         # C. Build the Query Engine
         query_engine = index.as_query_engine(
-            similarity_top_k=20, # Fetch a wide net initially
+            similarity_top_k=5, # Fetch top 5 context chunks
             node_postprocessors=[cohere_rerank], # Apply the reranker filter
             text_qa_template=prompt_template, # Force the JSON prompt
             response_mode="compact"
