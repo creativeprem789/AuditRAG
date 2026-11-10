@@ -1,6 +1,6 @@
-# TODO: Implement AI pipeline service
 import os
 import json
+import asyncio
 from pathlib import Path
 from typing import Dict, Any
 from dotenv import load_dotenv
@@ -10,7 +10,6 @@ env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
 from tenacity import retry, stop_after_attempt, wait_random_exponential, retry_if_exception_type
-from groq import RateLimitError, InternalServerError
 
 from llama_index.core import VectorStoreIndex, Settings
 from llama_index.core.prompts import PromptTemplate
@@ -22,7 +21,7 @@ from qdrant_client import QdrantClient
 
 # Global LlamaIndex Settings
 Settings.llm = Gemini(
-    model="models/gemini-3.8-flash",
+    model="models/gemini-2.0-flash",
     api_key=os.getenv("GEMINI_API_KEY"),
     timeout=120.0
 )
@@ -37,7 +36,7 @@ def init_settings():
     """Lazily configure LLM and embedding settings if not already set."""
     if Settings.llm is None or not isinstance(Settings.llm, Gemini):
         Settings.llm = Gemini(
-            model="models/gemini-3.8-flash",
+            model="models/gemini-2.0-flash",
             api_key=os.getenv("GEMINI_API_KEY"),
             timeout=120.0
         )
@@ -69,13 +68,13 @@ prompt_template = PromptTemplate(AUDITOR_SYSTEM_PROMPT)
 
 # 4. Resilience Strategy: Exponential Backoff with Jitter
 @retry(
-    retry=retry_if_exception_type((RateLimitError, InternalServerError, Exception)), 
+    retry=retry_if_exception_type(Exception),
     wait=wait_random_exponential(multiplier=1.5, max=20),
     stop=stop_after_attempt(4),
-    reraise=True 
+    reraise=True
 )
 def _execute_with_retries(query_engine, claim: str):
-    """Wraps the actual Groq API call to catch and retry 429 Rate Limit errors invisibly."""
+    """Wraps the actual LLM API call to catch and retry transient errors."""
     print(f"Evaluating claim: '{claim[:50]}...'")
     response = query_engine.query(claim)
     return response.response
@@ -107,8 +106,8 @@ async def execute_audit_query(claim: str, collection_name: str = "rulebook") -> 
             response_mode="compact"
         )
 
-        # D. Execute with Tenacity Retries
-        raw_json_string = _execute_with_retries(query_engine, claim)
+        # D. Execute with Tenacity Retries (off-thread to not block the async event loop)
+        raw_json_string = await asyncio.to_thread(_execute_with_retries, query_engine, claim)
         
         # E. Parse and return safely
         try:
