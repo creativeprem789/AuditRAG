@@ -15,10 +15,9 @@ tenacity
 llama-index-core
 llama-index-llms-groq
 llama-index-llms-openai-like
-llama-index-embeddings-huggingface
+llama-index-embeddings-cohere
 llama-index-postprocessor-cohere-rerank
 llama-index-vector-stores-qdrant
-sentence-transformers
 cohere
 groq
 llama-cloud>=2.18

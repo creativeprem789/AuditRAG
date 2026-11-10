@@ -12,7 +12,7 @@ load_dotenv(dotenv_path=env_path)
 from llama_index.core.schema import Document
 from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.node_parser import MarkdownNodeParser, SentenceSplitter
-from llama_index.embeddings.huggingface import HuggingFaceInferenceAPIEmbedding
+from llama_index.embeddings.cohere import CohereEmbedding
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 
@@ -36,11 +36,10 @@ async def ingest_documents_to_qdrant(documents: List[Document], collection_name:
     embeds them via the free Hugging Face API, and stores them in Qdrant.
     """
     try:
-        # 2. Configure the Serverless Embedding Model (BGE-M3)
-        # This prevents the 2.5GB model from downloading to your local machine/Render server
-        embed_model = HuggingFaceInferenceAPIEmbedding(
-            model_name="BAAI/bge-m3",
-            token=os.getenv("HF_TOKEN")
+        # 2. Configure the Serverless Embedding Model (Cohere embed-english-v3.0)
+        embed_model = CohereEmbedding(
+            cohere_api_key=os.getenv("COHERE_API_KEY"),
+            model_name="embed-english-v3.0"
         )
 
         # 3. Connect to the specific Qdrant Collection ("rulebook" or "uploaded_docs")
@@ -53,7 +52,7 @@ async def ingest_documents_to_qdrant(documents: List[Document], collection_name:
         pipeline = IngestionPipeline(
             transformations=[
                 MarkdownNodeParser(),
-                SentenceSplitter(chunk_size=1024, chunk_overlap=200),
+                SentenceSplitter(chunk_size=512, chunk_overlap=50),
                 embed_model
             ],
             vector_store=vector_store

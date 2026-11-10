@@ -16,18 +16,28 @@ from llama_index.core import VectorStoreIndex, Settings
 from llama_index.core.prompts import PromptTemplate
 from llama_index.llms.groq import Groq
 from llama_index.postprocessor.cohere_rerank import CohereRerank
-from llama_index.embeddings.huggingface import HuggingFaceInferenceAPIEmbedding
+from llama_index.embeddings.cohere import CohereEmbedding
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 
+# Global LlamaIndex Settings
+Settings.embed_model = CohereEmbedding(
+    cohere_api_key=os.getenv("COHERE_API_KEY"),
+    model_name="embed-english-v3.0"
+)
+Settings.chunk_size = 512
+Settings.chunk_overlap = 50
+
 def init_settings():
-    """Lazily configure global AI settings so environment variables are loaded."""
+    """Lazily configure LLM settings so environment variables are loaded."""
     if Settings.llm is None or not isinstance(Settings.llm, Groq):
         groq_key = os.getenv("GROQ_API_KEY")
         Settings.llm = Groq(model="openai/gpt-oss-120b", api_key=groq_key)
-    if Settings.embed_model is None or not isinstance(Settings.embed_model, HuggingFaceInferenceAPIEmbedding):
-        hf_token = os.getenv("HF_TOKEN")
-        Settings.embed_model = HuggingFaceInferenceAPIEmbedding(model_name="BAAI/bge-m3", token=hf_token)
+    if Settings.embed_model is None or not isinstance(Settings.embed_model, CohereEmbedding):
+        Settings.embed_model = CohereEmbedding(
+            cohere_api_key=os.getenv("COHERE_API_KEY"),
+            model_name="embed-english-v3.0"
+        )
 
 # 3. The Critic Agent Prompt (Enforces strict JSON)
 AUDITOR_SYSTEM_PROMPT = """
