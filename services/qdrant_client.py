@@ -7,12 +7,18 @@ from dotenv import load_dotenv
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
+from llama_index.core import Settings
 from llama_index.core.schema import Document
 from llama_index.core.ingestion import IngestionPipeline
-from llama_index.core.node_parser import MarkdownNodeParser, SentenceSplitter
+from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.cohere import CohereEmbedding
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient, AsyncQdrantClient
+
+# Global LlamaIndex chunking settings
+Settings.text_splitter = SentenceSplitter(chunk_size=512, chunk_overlap=50)
+Settings.chunk_size = 512
+Settings.chunk_overlap = 50
 
 # 1. Initialize the Qdrant Client connections globally
 _client = None
@@ -55,11 +61,13 @@ async def ingest_documents_to_qdrant(documents: List[Document], collection_name:
             collection_name=collection_name
         )
 
-        # 4. Set up the exact Chunking Strategy
+        # 4. Set up the exact Chunking Strategy with SentenceSplitter (512 tokens, 50 overlap)
+        splitter = SentenceSplitter(chunk_size=512, chunk_overlap=50)
+        Settings.text_splitter = splitter
+
         pipeline = IngestionPipeline(
             transformations=[
-                MarkdownNodeParser(),
-                SentenceSplitter(chunk_size=512, chunk_overlap=50),
+                splitter,
                 embed_model
             ],
             vector_store=vector_store
