@@ -11,7 +11,7 @@ load_dotenv(dotenv_path=env_path)
 
 from tenacity import retry, stop_after_attempt, wait_random_exponential, retry_if_exception_type
 
-from llama_index.core import VectorStoreIndex, Settings
+from llama_index.core import VectorStoreIndex, Settings, QueryBundle
 from llama_index.core.prompts import PromptTemplate
 from llama_index.llms.gemini import Gemini
 from llama_index.postprocessor.cohere_rerank import CohereRerank
@@ -76,7 +76,8 @@ prompt_template = PromptTemplate(AUDITOR_SYSTEM_PROMPT)
 def _execute_with_retries(query_engine, claim: str):
     """Wraps the actual LLM API call to catch and retry transient errors."""
     print(f"Evaluating claim: '{claim[:50]}...'")
-    nodes = query_engine.retrieve(claim)
+    bundle = QueryBundle(claim)
+    nodes = query_engine.retrieve(bundle)
     for node in nodes:
         print(node.text)
     response = query_engine.query(claim)
