@@ -1,5 +1,3 @@
-# TODO: Implement Qdrant client service
-
 import os
 from pathlib import Path
 from typing import List, Dict
@@ -14,26 +12,34 @@ from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.node_parser import MarkdownNodeParser, SentenceSplitter
 from llama_index.embeddings.cohere import CohereEmbedding
 from llama_index.vector_stores.qdrant import QdrantVectorStore
-from qdrant_client import QdrantClient
+from qdrant_client import QdrantClient, AsyncQdrantClient
 
-# 1. Initialize the Qdrant Client connection globally
-qdrant_url = os.getenv("QDRANT_URL")
-qdrant_api_key = os.getenv("QDRANT_API_KEY")
-
+# 1. Initialize the Qdrant Client connections globally
 _client = None
+_aclient = None
 
 def get_qdrant_client() -> QdrantClient:
     global _client
     if _client is None:
         url = os.getenv("QDRANT_URL")
         api_key = os.getenv("QDRANT_API_KEY")
-        _client = QdrantClient(url=url, api_key=api_key)
+        # Added a 120-second timeout for large batch uploads
+        _client = QdrantClient(url=url, api_key=api_key, timeout=120.0)
     return _client
+
+def get_qdrant_aclient() -> AsyncQdrantClient:
+    global _aclient
+    if _aclient is None:
+        url = os.getenv("QDRANT_URL")
+        api_key = os.getenv("QDRANT_API_KEY")
+        # Added a 120-second timeout for the async pipeline uploads
+        _aclient = AsyncQdrantClient(url=url, api_key=api_key, timeout=120.0)
+    return _aclient
 
 async def ingest_documents_to_qdrant(documents: List[Document], collection_name: str) -> Dict[str, any]:
     """
     Takes LlamaIndex Documents, chunks them strictly by Markdown headers and token limits, 
-    embeds them via the free Hugging Face API, and stores them in Qdrant.
+    embeds them via the free Cohere API, and stores them in Qdrant.
     """
     try:
         # 2. Configure the Serverless Embedding Model (Cohere embed-english-v3.0)
@@ -45,6 +51,7 @@ async def ingest_documents_to_qdrant(documents: List[Document], collection_name:
         # 3. Connect to the specific Qdrant Collection ("rulebook" or "uploaded_docs")
         vector_store = QdrantVectorStore(
             client=get_qdrant_client(), 
+            aclient=get_qdrant_aclient(),
             collection_name=collection_name
         )
 
@@ -59,7 +66,7 @@ async def ingest_documents_to_qdrant(documents: List[Document], collection_name:
         )
 
         # 5. Execute the pipeline asynchronously
-        # .arun() handles the network calls to Hugging Face and Qdrant concurrently
+        # .arun() handles the network calls to Cohere and Qdrant concurrently
         print(f"Ingesting {len(documents)} documents into '{collection_name}' collection...")
         nodes = await pipeline.arun(documents=documents)
         print(f"Successfully generated and inserted {len(nodes)} vector chunks.")

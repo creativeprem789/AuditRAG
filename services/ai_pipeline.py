@@ -21,7 +21,7 @@ from qdrant_client import QdrantClient
 
 # Global LlamaIndex Settings
 Settings.llm = Gemini(
-    model="models/gemini-2.0-flash",
+    model="models/gemini-3.5-flash",
     api_key=os.getenv("GEMINI_API_KEY"),
     timeout=120.0
 )
@@ -36,7 +36,7 @@ def init_settings():
     """Lazily configure LLM and embedding settings if not already set."""
     if Settings.llm is None or not isinstance(Settings.llm, Gemini):
         Settings.llm = Gemini(
-            model="models/gemini-2.0-flash",
+            model="models/gemini-3.5-flash",
             api_key=os.getenv("GEMINI_API_KEY"),
             timeout=120.0
         )
@@ -89,8 +89,8 @@ async def execute_audit_query(claim: str, collection_name: str = "rulebook") -> 
         init_settings()
         cohere_api_key = os.getenv("COHERE_API_KEY")
 
-        # A. Connect to the existing Qdrant vectors
-        client = QdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY"))
+        # A. Connect to the existing Qdrant vectors (120s timeout for large collection queries)
+        client = QdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY"), timeout=120.0)
         vector_store = QdrantVectorStore(client=client, collection_name=collection_name)
         index = VectorStoreIndex.from_vector_store(vector_store)
 
