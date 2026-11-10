@@ -9,8 +9,8 @@ load_dotenv(dotenv_path=env_path)
 from llama_index.core import Settings
 from llama_index.llms.gemini import Gemini
 
-# Global LlamaIndex LLM configuration to use Gemini 3.1 Pro Preview
-Settings.llm = Gemini(model="models/gemini-3.1-pro-preview", api_key=os.getenv("GEMINI_API_KEY"), timeout=120.0)
+# Global LlamaIndex LLM configuration to use Gemini 3.8 Flash
+Settings.llm = Gemini(model="models/gemini-3.8-flash", api_key=os.getenv("GEMINI_API_KEY"), timeout=120.0)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

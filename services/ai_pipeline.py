@@ -22,7 +22,7 @@ from qdrant_client import QdrantClient
 
 # Global LlamaIndex Settings
 Settings.llm = Gemini(
-    model="models/gemini-3.1-pro-preview",
+    model="models/gemini-3.8-flash",
     api_key=os.getenv("GEMINI_API_KEY"),
     timeout=120.0
 )
@@ -37,7 +37,7 @@ def init_settings():
     """Lazily configure LLM and embedding settings if not already set."""
     if Settings.llm is None or not isinstance(Settings.llm, Gemini):
         Settings.llm = Gemini(
-            model="models/gemini-3.1-pro-preview",
+            model="models/gemini-3.8-flash",
             api_key=os.getenv("GEMINI_API_KEY"),
             timeout=120.0
         )
