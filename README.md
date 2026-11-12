@@ -4,6 +4,8 @@
 
 **Deterministic Enterprise Compliance Verification via Adversarial RAG**
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-audit--rag--dev.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://audit-rag-dev.vercel.app/)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -13,6 +15,8 @@
 
 > "AuditRag automates enterprise document audits against strict compliance frameworks (PCI-DSS, DPDP Act), replacing manual review with deterministic, hallucination-free verification."
 
+🚀 **Explore the Live Application:** **[https://audit-rag-dev.vercel.app/](https://audit-rag-dev.vercel.app/)**
+
 [Live Demo](https://audit-rag-dev.vercel.app/) • [Architecture](#-architecture) • [Empirical Performance](#-empirical-benchmarks) • [Tech Stack](#-core-tech-stack) • [Getting Started](#-getting-started)
 
 </div>
@@ -20,6 +24,8 @@
 ---
 
 ## 📌 Overview
+
+> **Live Deployment:** The interactive platform is live on Vercel at **[https://audit-rag-dev.vercel.app/](https://audit-rag-dev.vercel.app/)**. Upload sample policies or select demo presets to run real-time compliance audits.
 
 Enterprise legal, SecOps, and compliance teams spend countless hours auditing technical policy documents, architecture diagrams, and vendor agreements against rigid regulatory mandates. Traditional LLM-based solutions suffer from context window saturation, silent hallucinations, and non-deterministic rulings.
 
